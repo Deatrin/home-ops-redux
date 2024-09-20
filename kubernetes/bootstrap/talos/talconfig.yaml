@@ -45,7 +45,7 @@ nodes:
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "d8:9e:f3:81:c5:a4"
+          hardwareAddr: "14:b3:1f:2b:e3:6b"
         dhcp: false
         addresses:
           - "192.168.100.10/24"
@@ -62,7 +62,7 @@ nodes:
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "14:b3:1f:2b:e3:6b"
+          hardwareAddr: "d8:9e:f3:81:c5:a4"
         dhcp: false
         addresses:
           - "192.168.100.15/24"
@@ -94,6 +94,14 @@ patches:
           - 1
           - 6
           - 6
+          - ,
+          - 1
+          - .
+          - 1
+          - .
+          - 1
+          - .
+          - 1
   - "@./patches/global/cluster-discovery.yaml"
   - "@./patches/global/containerd.yaml"
   - "@./patches/global/disable-search-domain.yaml"
