@@ -1,0 +1,137 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+talosVersion: v1.7.6
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.30.3
+
+clusterName: "home-kubernetes"
+endpoint: https://192.168.100.100:6443
+clusterPodNets:
+  - "10.69.0.0/16"
+clusterSvcNets:
+  - "10.96.0.0/16"
+additionalApiServerCertSans: &sans
+  - "192.168.100.100"
+  - 127.0.0.1 # KubePrism
+additionalMachineCertSans: *sans
+
+# Disable built-in Flannel to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "talos1"
+    ipAddress: "192.168.100.5"
+    installDisk: "/dev/nvme0n1"
+    talosImageURL: factory.talos.dev/installer/2d61dd07b20062062ea671b4d01873506103b67c0f7a4c3fb6cf4ee85585dcb8
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:9e:f3:9c:82:b6"
+        dhcp: false
+        addresses:
+          - "192.168.100.5/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.100"
+  - hostname: "talos2"
+    ipAddress: "192.168.100.10"
+    installDisk: "/dev/sdc"
+    talosImageURL: factory.talos.dev/installer/2d61dd07b20062062ea671b4d01873506103b67c0f7a4c3fb6cf4ee85585dcb8
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:9e:f3:81:c5:a4"
+        dhcp: false
+        addresses:
+          - "192.168.100.10/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.100"
+  - hostname: "talos3"
+    ipAddress: "192.168.100.15"
+    installDisk: "/dev/sdc"
+    talosImageURL: factory.talos.dev/installer/2d61dd07b20062062ea671b4d01873506103b67c0f7a4c3fb6cf4ee85585dcb8
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "14:b3:1f:2b:e3:6b"
+        dhcp: false
+        addresses:
+          - "192.168.100.15/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.100"
+
+# Global patches
+patches:
+  - # Force nameserver
+    |-
+    machine:
+      network:
+        nameservers:
+          - 1
+          - 9
+          - 2
+          - .
+          - 1
+          - 6
+          - 8
+          - .
+          - 3
+          - 0
+          - .
+          - 1
+          - 6
+          - 6
+  - # Configure NTP
+    |-
+    machine:
+      time:
+        disabled: false
+        servers:
+          - t
+          - i
+          - m
+          - e
+          - .
+          - c
+          - l
+          - o
+          - u
+          - d
+          - f
+          - l
+          - a
+          - r
+          - e
+          - .
+          - c
+          - o
+          - m
+  - "@./patches/global/cluster-discovery.yaml"
+  - "@./patches/global/containerd.yaml"
+  - "@./patches/global/disable-search-domain.yaml"
+  - "@./patches/global/hostdns.yaml"
+  - "@./patches/global/kubelet.yaml"
+  - "@./patches/global/openebs-local.yaml"
+  - "@./patches/global/sysctl.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/api-access.yaml"
+    - "@./patches/controller/cluster.yaml"
+    - "@./patches/controller/disable-admission-controller.yaml"
+    - "@./patches/controller/etcd.yaml"
+
